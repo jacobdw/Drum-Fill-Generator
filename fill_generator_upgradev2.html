@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Drum Fill Idea Generator</title>
+  <style>
+    body {
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      max-width: 900px;
+      margin: 40px auto;
+      padding: 0 16px 40px;
+      background: #f5f5f7;
+      color: #111;
+    }
+    h1 {
+      font-size: 1.9rem;
+      margin-bottom: 0.25rem;
+    }
+    p {
+      line-height: 1.4;
+    }
+    .controls {
+      margin: 16px 0 20px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+    button {
+      padding: 8px 16px;
+      font-size: 0.95rem;
+      border-radius: 999px;
+      border: 1px solid #ccc;
+      cursor: pointer;
+      background: #ffffff;
+      color: #111;
+    }
+    button:hover {
+      background: #f0f0f0;
+    }
+    .cards {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+    .card {
+      border-radius: 14px;
+      padding: 10px 12px 12px;
+      border: 1px solid #ddd;
+      background: #ffffff;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 4px;
+    }
+    .card h2 {
+      font-size: 0.85rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      margin: 0;
+      opacity: 0.75;
+    }
+    .lock-label {
+      font-size: 0.75rem;
+      opacity: 0.9;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      cursor: pointer;
+    }
+    .lock-label input {
+      cursor: pointer;
+    }
+    .card p {
+      margin: 0;
+      font-size: 0.95rem;
+    }
+    .card button {
+      align-self: flex-start;
+      padding: 4px 10px;
+      font-size: 0.8rem;
+      border-radius: 999px;
+      margin-top: 2px;
+    }
+    .note {
+      font-size: 0.8rem;
+      opacity: 0.7;
+      margin-top: 4px;
+      margin-bottom: 8px;
+    }
+    .export-box {
+      margin-top: 12px;
+    }
+    textarea {
+      width: 100%;
+      min-height: 110px;
+      resize: vertical;
+      border-radius: 10px;
+      border: 1px solid #ccc;
+      background: #ffffff;
+      color: #111;
+      padding: 8px 10px;
+      font-family: inherit;
+      font-size: 0.9rem;
+      box-sizing: border-box;
+    }
+    .export-controls {
+      margin-top: 6px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+    .status {
+      font-size: 0.75rem;
+      opacity: 0.75;
+      margin-top: 4px;
+      min-height: 1em;
+    }
+  </style>
+</head>
+<body>
+  <h1>Drum Fill Idea Generator</h1>
+  <p>Click <strong>Generate All</strong> for a fresh combo, or re-roll / lock individual cards while you experiment in Ableton.</p>
+
+  <div class="controls">
+    <button onclick="generateAll()">Generate All</button>
+  </div>
+
+  <div class="cards">
+    <div class="card">
+      <div class="card-header">
+        <h2>Structure</h2>
+        <label class="lock-label">
+          <input type="checkbox" id="lock-structure">
+          Lock
+        </label>
+      </div>
+      <p id="structure"></p>
+      <button onclick="reroll('structure')">Re-roll Structure</button>
+    </div>
+
+    <div class="card">
+      <div class="card-header">
+        <h2>Rate / Rhythm</h2>
+        <label class="lock-label">
+          <input type="checkbox" id="lock-rate">
+          Lock
+        </label>
+      </div>
+      <p id="rate"></p>
+      <button onclick="reroll('rate')">Re-roll Rate</button>
+    </div>
+
+    <div class="card">
+      <div class="card-header">
+        <h2>Timbre</h2>
+        <label class="lock-label">
+          <input type="checkbox" id="lock-timbre">
+          Lock
+        </label>
+      </div>
+      <p id="timbre"></p>
+      <button onclick="reroll('timbre')">Re-roll Timbre</button>
+    </div>
+
+    <div class="card">
+      <div class="card-header">
+        <h2>Space / Density</h2>
+        <label class="lock-label">
+          <input type="checkbox" id="lock-spaceDensity">
+          Lock
+        </label>
+      </div>
+      <p id="spaceDensity"></p>
+      <button onclick="reroll('spaceDensity')">Re-roll Space/Density</button>
+    </div>
+
+    <div class="card">
+      <div class="card-header">
+        <h2>FX</h2>
+        <label class="lock-label">
+          <input type="checkbox" id="lock-fx">
+          Lock
+        </label>
+      </div>
+      <p id="fx"></p>
+      <button onclick="reroll('fx')">Re-roll FX</button>
+    </div>
+  </div>
+
+  <p class="note">
+    Tip: commit to each combo for at least a few minutes of play before you roll again. Treat it like a constraint game.
+  </p>
+
+  <div class="export-box">
+    <h3>Export Current Fill</h3>
+    <p class="note">Use this to paste into your production journal or Ableton project notes.</p>
+    <textarea id="exportText" placeholder="Click &quot;Generate Export Text&quot; to dump the current combo here."></textarea>
+    <div class="export-controls">
+      <button onclick="generateExport()">Generate Export Text</button>
+      <button onclick="copyExport()">Copy to Clipboard</button>
+    </div>
+    <div class="status" id="status"></div>
+  </div>
+
+  <script>
+    const structureCards = [
+      "1/4-bar microfill right before the drop",
+      "1/2-bar fill at the end of the phrase",
+      "1-bar fill leading into a new section",
+      "Microfill just before the snare on beat 4",
+      "Stop-everything fill: full bar of tension then slam on 1",
+      "Tiny pick-up fill: last 2 beats only"
+    ];
+
+    const rateCards = [
+      "1/8 → 1/16 acceleration across the fill",
+      "Triplet burst then resolve back to straight 1/8",
+      "3-note groupings over 4/4 (3-3-3-3… feel)",
+      "Ratchet one element (e.g. hat) into 1/32 for the last beat",
+      "Busy → minimal (thin out hits towards beat 1)",
+      "Shift the last snare/clap early by a few ms for a pulled feel",
+      "Keep main groove but add ghost notes between existing hits"
+    ];
+
+    const timbreCards = [
+      "Tuned tom run with melodic movement",
+      "Foley clicks / paper crinkle as high percussion",
+      "Noise burst shaped with a filter envelope",
+      "Dry rimshot + clap stack as main voice",
+      "Mallet / marimba-style hits as percussive melody",
+      "Seed shaker or small hand percussion chopped into hits",
+      "Reverse cymbal or whoosh layered behind each hit"
+    ];
+
+    const spaceCards = [
+      "Remove the kick entirely in the fill bar",
+      "Mute hats: only toms / perc and silence",
+      "Leave the last half-beat completely empty before the drop",
+      "Mono, dry fill after a wide, wet groove",
+      "Ghost notes swelling in density towards beat 1",
+      "Low-only fill (sub + toms) with no highs",
+      "High-only fill (hats / clicks) with no lows"
+    ];
+
+    const fxCards = [
+      "Single delay throw on one key hit (1/8 or 1/4 note)",
+      "Reverse reverb swell into the downbeat",
+      "Low-pass filter sweep down, then hard open on 1",
+      "Short grain delay stutter on a clap or tom",
+      "Resonator tuned to 5ths on a noise burst",
+      "Freeze reverb tail, resample, then chop as the fill material",
+      "Subtle phaser or flanger moving across the fill only"
+    ];
+
+    const categories = {
+      structure: { elementId: "structure", lockId: "lock-structure", cards: structureCards, label: "Structure" },
+      rate: { elementId: "rate", lockId: "lock-rate", cards: rateCards, label: "Rate / Rhythm" },
+      timbre: { elementId: "timbre", lockId: "lock-timbre", cards: timbreCards, label: "Timbre" },
+      spaceDensity: { elementId: "spaceDensity", lockId: "lock-spaceDensity", cards: spaceCards, label: "Space / Density" },
+      fx: { elementId: "fx", lockId: "lock-fx", cards: fxCards, label: "FX" }
+    };
+
+    function pickRandom(arr) {
+      return arr[Math.floor(Math.random() * arr.length)];
+    }
+
+    function reroll(key) {
+      const cat = categories[key];
+      if (!cat) return;
+      const locked = document.getElementById(cat.lockId).checked;
+      if (locked) return;
+      document.getElementById(cat.elementId).textContent = pickRandom(cat.cards);
+    }
+
+    function generateAll() {
+      Object.keys(categories).forEach(key => {
+        const cat = categories[key];
+        const locked = document.getElementById(cat.lockId).checked;
+        if (!locked) {
+          document.getElementById(cat.elementId).textContent = pickRandom(cat.cards);
+        }
+      });
+      clearStatus();
+    }
+
+    function generateExport() {
+      let lines = ["Drum Fill Recipe:"];
+      Object.keys(categories).forEach(key => {
+        const cat = categories[key];
+        const text = document.getElementById(cat.elementId).textContent || "(none)";
+        lines.push(`- ${cat.label}: ${text}`);
+      });
+      const exportArea = document.getElementById("exportText");
+      exportArea.value = lines.join("\n");
+      setStatus("Export text updated.");
+    }
+
+    function copyExport() {
+      const exportArea = document.getElementById("exportText");
+      if (!exportArea.value.trim()) {
+        generateExport();
+      }
+      exportArea.select();
+      try {
+        const successful = document.execCommand("copy");
+        if (successful) {
+          setStatus("Copied to clipboard ✔");
+        } else {
+          setStatus("Could not copy automatically, but text is selected.");
+        }
+      } catch (e) {
+        setStatus("Copy failed in this browser, but text is selected.");
+      }
+    }
+
+    function setStatus(msg) {
+      document.getElementById("status").textContent = msg;
+    }
+
+    function clearStatus() {
+      document.getElementById("status").textContent = "";
+    }
+
+    // Generate initial combo on load
+    generateAll();
+  </script>
+</body>
+</html>
